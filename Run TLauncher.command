@@ -11,7 +11,6 @@ ZULU_VERSION='zulu8.96.0.205-ca-fx-jre8.0.504'
 APP_DIR="${TLAUNCHER_HELPER_HOME:-$HOME/Library/Application Support/TLauncher-macOS-helper}"
 JAR="$APP_DIR/TLauncher.jar"
 PREPARE_ONLY=0
-SELF_CONTAINED=0
 TEMP_DIR=''
 
 fail() {
@@ -48,9 +47,8 @@ is_java8_fx() {
 for arg in "$@"; do
   case "$arg" in
     --prepare-only) PREPARE_ONLY=1 ;;
-    --self-contained) SELF_CONTAINED=1 ;;
     *)
-      print 'Usage: zsh "Run TLauncher.command" [--prepare-only] [--self-contained]'
+      print 'Usage: zsh "Run TLauncher.command" [--prepare-only]'
       exit 2
       ;;
   esac
@@ -88,16 +86,6 @@ if [[ ! -f "$JAR" || "$(sha256 "$JAR")" != "$TLAUNCHER_JAR_SHA256" ]]; then
   /bin/mv -f "$TEMP_DIR/TLauncher.jar" "$JAR"
   cleanup
   TEMP_DIR=''
-fi
-
-if (( ! SELF_CONTAINED )) && ! is_java8_fx "$JAVA"; then
-  # Reuse the matching JavaFX runtime if TLauncher has already downloaded it.
-  for candidate in "$HOME/Library/Application Support/TLauncher/runtime"/*/Contents/Home/bin/java; do
-    if [[ "$candidate" == *"macosx_$ZULU_ARCH"* ]] && is_java8_fx "$candidate"; then
-      JAVA="$candidate"
-      break
-    fi
-  done
 fi
 
 if ! is_java8_fx "$JAVA"; then
